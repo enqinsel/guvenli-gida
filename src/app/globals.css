@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/* ============================================
+   GÜVENLI GIDA - SWISS STYLE DESIGN SYSTEM
+   High Contrast Light Mode
+   ============================================ */
+
+:root {
+  /* Core Colors - Swiss Minimalism */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-hover: #F3F4F6;
+  
+  /* Text Colors - Maximum Readability */
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6B7280;
+  
+  /* Border Colors */
+  --border-primary: #E5E7EB;
+  --border-strong: #D1D5DB;
+  
+  /* Category Colors - High Contrast */
+  --category-saglik-bg: #FEE2E2;
+  --category-saglik-text: #991B1B;
+  --category-saglik-border: #FECACA;
+  
+  --category-taklit1-bg: #FFEDD5;
+  --category-taklit1-text: #9A3412;
+  --category-taklit1-border: #FED7AA;
+  
+  --category-taklit2-bg: #FEF3C7;
+  --category-taklit2-text: #92400E;
+  --category-taklit2-border: #FDE68A;
+  
+  /* Accent Colors */
+  --accent-green-bg: #ECFDF5;
+  --accent-green-text: #065F46;
+  --accent-green-border: #A7F3D0;
+  
+  /* Focus States */
+  --focus-ring: #111827;
+  
+  /* Font */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Force light mode - disable dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
+    --text-primary: #111827;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   TYPOGRAPHY - Swiss Hierarchy
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: 1.875rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+/* ============================================
+   FORM ELEMENTS - Clean & Focused
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="search"],
+select {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-strong);
+  border-radius: 0;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   BUTTONS - Swiss Bold
+   ============================================ */
+
+button {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* ============================================
+   TABLE - Grid Excellence
+   ============================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+thead {
+  background: var(--bg-secondary);
+}
+
+th {
+  text-align: left;
+  padding: 1rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--text-primary);
+}
+
+td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--border-primary);
+  vertical-align: top;
+}
+
+tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+tbody tr:hover {
+  background-color: var(--bg-hover);
+}
+
+/* ============================================
+   CATEGORY BADGES - High Contrast
+   ============================================ */
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+
+.badge-saglik {
+  background: var(--category-saglik-bg);
+  color: var(--category-saglik-text);
+  border-color: var(--category-saglik-border);
+}
+
+.badge-taklit1 {
+  background: var(--category-taklit1-bg);
+  color: var(--category-taklit1-text);
+  border-color: var(--category-taklit1-border);
+}
+
+.badge-taklit2 {
+  background: var(--category-taklit2-bg);
+  color: var(--category-taklit2-text);
+  border-color: var(--category-taklit2-border);
+}
+
+/* ============================================
+   SUBSCRIBER BADGE
+   ============================================ */
+
+.subscriber-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent-green-bg);
+  border: 1px solid var(--accent-green-border);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--accent-green-text);
+}
+
+.subscriber-badge .pulse {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #10B981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================
+   LAYOUT HELPERS
+   ============================================ */
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ============================================
+   SCROLLBAR - Minimal
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
