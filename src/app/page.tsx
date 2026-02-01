@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import SearchBar from '@/components/SearchBar';
 import FoodTable from '@/components/FoodTable';
 import SubscribeForm from '@/components/SubscribeForm';
@@ -30,7 +31,13 @@ export default function Home() {
         <div className="header-content">
           <div className="header-left">
             <h1 className="logo">
-              <span className="logo-icon">🍽️</span>
+              <Image
+                src="/icon.png"
+                alt="Güvenli Gıda Logo"
+                width={40}
+                height={40}
+                className="logo-image"
+              />
               GÜVENLİ GIDA
             </h1>
             <p className="subtitle">
@@ -128,12 +135,12 @@ export default function Home() {
           color: #111827;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.625rem;
           margin: 0;
         }
         
-        .logo-icon {
-          font-size: 1.75rem;
+        .logo :global(.logo-image) {
+          border-radius: 4px;
         }
         
         .subtitle {
@@ -265,8 +272,9 @@ export default function Home() {
             font-size: 1.25rem;
           }
           
-          .logo-icon {
-            font-size: 1.25rem;
+          .logo :global(.logo-image) {
+            width: 28px;
+            height: 28px;
           }
         }
       `}</style>
