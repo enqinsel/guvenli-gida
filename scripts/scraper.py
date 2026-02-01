@@ -190,13 +190,14 @@ def sync_to_database(records: list[dict], dry_run: bool = False) -> dict:
     """
     Sync scraped records to Supabase.
     Implements 'Never Delete' strategy - marks missing records as inactive.
+    Returns stats dict with inserted_records list for email notification.
     """
     if dry_run:
         print("\n🔍 DRY RUN - No changes will be made to database")
-        return {"inserted": 0, "updated": 0, "deactivated": 0}
+        return {"inserted": 0, "updated": 0, "deactivated": 0, "inserted_records": []}
     
     supabase = get_supabase()
-    stats = {"inserted": 0, "updated": 0, "deactivated": 0}
+    stats = {"inserted": 0, "updated": 0, "deactivated": 0, "inserted_records": []}
     
     # Get current active records from DB
     existing = supabase.table("foods").select("*").eq("is_active", True).execute()
@@ -219,6 +220,8 @@ def sync_to_database(records: list[dict], dry_run: bool = False) -> dict:
             try:
                 supabase.table("foods").insert(record).execute()
                 stats["inserted"] += 1
+                # Track inserted record for email notification
+                stats["inserted_records"].append(record)
             except Exception as e:
                 print(f"⚠ Failed to insert record: {e}")
     
@@ -243,8 +246,14 @@ def sync_to_database(records: list[dict], dry_run: bool = False) -> dict:
     return stats
 
 
-def send_notification_email(new_count: int) -> bool:
-    """Send email notification to all subscribers when new records are found."""
+def send_notification_email(new_records: list[dict]) -> bool:
+    """Send email notification to all subscribers when new records are found.
+    
+    Args:
+        new_records: List of newly inserted record dicts with full details
+    """
+    new_count = len(new_records)
+    
     if new_count == 0:
         print("📧 No new records - skipping email notification")
         return False
@@ -264,6 +273,118 @@ def send_notification_email(new_count: int) -> bool:
     
     emails = [s["email"] for s in subscribers.data]
     
+    # Build HTML table rows for new records
+    table_rows = ""
+    for record in new_records:
+        company = record.get("company_name", "-")
+        product = record.get("product_name", "-")
+        brand = record.get("brand", "-")
+        violation = record.get("violation", "-")
+        city = record.get("city", "-")
+        date = record.get("announcement_date", "-")
+        
+        table_rows += f"""
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 12px 8px; font-size: 14px; color: #111827; font-weight: 600;">
+                {company}
+                <div style="font-size: 12px; color: #6b7280; font-weight: 400; margin-top: 4px;">
+                    📍 {city} | 📅 {date}
+                </div>
+            </td>
+            <td style="padding: 12px 8px; font-size: 14px; color: #374151;">
+                <strong>{brand}</strong>
+                <div style="font-size: 13px; color: #6b7280; margin-top: 2px;">
+                    {product}
+                </div>
+            </td>
+            <td style="padding: 12px 8px; font-size: 13px; color: #991b1b; background: #fef2f2;">
+                {violation}
+            </td>
+        </tr>
+        """
+    
+    # Dynamic subject line
+    if new_count == 1:
+        subject = "🚨 1 Yeni Gıda İfşası Tespit Edildi"
+    else:
+        subject = f"🚨 {new_count} Yeni Gıda İfşası Tespit Edildi"
+    
+    # Full HTML email template
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+        <div style="max-width: 640px; margin: 0 auto; padding: 24px 16px;">
+            <!-- Header -->
+            <div style="background: #111827; padding: 24px; text-align: center;">
+                <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">
+                    🍽️ Güvenli Gıda
+                </h1>
+                <p style="margin: 8px 0 0; color: #9ca3af; font-size: 14px;">
+                    Gıda Güvenliği Takip Sistemi
+                </p>
+            </div>
+            
+            <!-- Alert Banner -->
+            <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 16px 20px; margin-top: 0;">
+                <h2 style="margin: 0; color: #991b1b; font-size: 18px; font-weight: 700;">
+                    ⚠️ {new_count} Yeni İfşa Kaydı Tespit Edildi
+                </h2>
+                <p style="margin: 8px 0 0; color: #7f1d1d; font-size: 14px;">
+                    Aşağıda yeni eklenen gıda güvenliği ihlallerinin detaylarını bulabilirsiniz.
+                </p>
+            </div>
+            
+            <!-- Records Table -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; margin-top: 24px; overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f3f4f6;">
+                            <th style="padding: 12px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #111827;">
+                                Firma
+                            </th>
+                            <th style="padding: 12px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #111827;">
+                                Marka / Ürün
+                            </th>
+                            <th style="padding: 12px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #111827;">
+                                Uygunsuzluk
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table_rows}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- CTA Button -->
+            <div style="text-align: center; margin-top: 32px;">
+                <a href="https://guvenligida.org" 
+                   style="display: inline-block; background: #111827; color: #ffffff; 
+                          padding: 14px 32px; text-decoration: none; font-weight: 600;
+                          font-size: 15px;">
+                    Tüm İfşaları Görüntüle →
+                </a>
+            </div>
+            
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+                <p style="margin: 0; color: #6b7280; font-size: 12px;">
+                    Bu e-posta, Güvenli Gıda platformuna abone olduğunuz için gönderilmiştir.
+                </p>
+                <p style="margin: 8px 0 0; color: #9ca3af; font-size: 11px;">
+                    © 2026 guvenligida.org | Gıda güvenliği herkesin hakkıdır.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
     # Send email via Resend
     try:
         response = requests.post(
@@ -275,23 +396,8 @@ def send_notification_email(new_count: int) -> bool:
             json={
                 "from": "Güvenli Gıda <bilgi@guvenligida.org>",
                 "to": emails,
-                "subject": f"🚨 {new_count} Yeni Gıda İfşası Tespit Edildi",
-                "html": f"""
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #dc2626;">🚨 Yeni Gıda İfşaları</h1>
-                    <p>Bugün <strong>{new_count}</strong> yeni gıda güvenliği ihlali tespit edildi.</p>
-                    <p>Detayları görmek için sitemizi ziyaret edin:</p>
-                    <a href="https://guvenligida.org" 
-                       style="display: inline-block; background: #dc2626; color: white; 
-                              padding: 12px 24px; text-decoration: none; border-radius: 6px;">
-                        İfşaları Görüntüle
-                    </a>
-                    <hr style="margin: 32px 0; border: none; border-top: 1px solid #e5e7eb;">
-                    <p style="color: #6b7280; font-size: 12px;">
-                        Bu e-postayı almak istemiyorsanız, sitemizdeki abonelik ayarlarından çıkabilirsiniz.
-                    </p>
-                </div>
-                """
+                "subject": subject,
+                "html": html_body
             }
         )
         
@@ -327,7 +433,7 @@ async def main():
     
     # Send notification if new records found
     if stats["inserted"] > 0 and not dry_run:
-        send_notification_email(stats["inserted"])
+        send_notification_email(stats["inserted_records"])
     
     print("\n✅ Scraping complete!")
     return stats
