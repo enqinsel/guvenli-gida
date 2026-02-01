@@ -273,7 +273,7 @@ def send_notification_email(new_count: int) -> bool:
                 "Content-Type": "application/json"
             },
             json={
-                "from": "Güvenli Gıda <bildirim@guvenligida.com>",
+                "from": "Güvenli Gıda <bilgi@guvenligida.org>",
                 "to": emails,
                 "subject": f"🚨 {new_count} Yeni Gıda İfşası Tespit Edildi",
                 "html": f"""
@@ -281,7 +281,7 @@ def send_notification_email(new_count: int) -> bool:
                     <h1 style="color: #dc2626;">🚨 Yeni Gıda İfşaları</h1>
                     <p>Bugün <strong>{new_count}</strong> yeni gıda güvenliği ihlali tespit edildi.</p>
                     <p>Detayları görmek için sitemizi ziyaret edin:</p>
-                    <a href="https://guvenligida.com" 
+                    <a href="https://guvenligida.org" 
                        style="display: inline-block; background: #dc2626; color: white; 
                               padding: 12px 24px; text-decoration: none; border-radius: 6px;">
                         İfşaları Görüntüle
